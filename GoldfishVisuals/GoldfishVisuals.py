@@ -1,34 +1,72 @@
 ﻿import numpy as np
 import pandas as pa
 import matplotlib.pyplot as mpl
+import http.client as http
+import json as js
 
-data = pa.read_csv("https://docs.google.com/spreadsheets/d/1nqQ01wzCNwJJOpVjLtOpPuOhm34CMwrZ1pImoZNOMhA/export?format=csv&gid=1802173994")
+col = {"White":"W", "Blue":"U", "Black":"B", "Red":"R", "Green":"G", "Colorless":"C"}
+order = ["W","U","B","R","G","C"]
+data = pa.DataFrame(pa.read_csv("https://docs.google.com/spreadsheets/d/1nqQ01wzCNwJJOpVjLtOpPuOhm34CMwrZ1pImoZNOMhA/export?format=csv&gid=1802173994"))
 
-#rank = data[["Rank"]]
-#name = data[["Name"]]
-#perc = data[["% of Decks"]]
-#num = data[["# Played"]]
+rank = data[["Rank"]]
+name = data["Name"]
+perc = data[["% of Decks"]]
+num = data[["# Played"]]
 
-print(data)
-d = pa.DataFrame(data)
-d.hist()
-mpl.show()
+#names = list(name)
 
-'''
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+#conn = http.HTTPSConnection("api.scryfall.com")
+#conn.request("GET", ("/cards/named?exact={}".format(names[15]).replace(" ", "+")))
 
+#resp = conn.getresponse().read()
+#respdata = js.loads(resp)
 
-# use creds to create a client to interact with the Google Drive API
-scope = ['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('GoldfishVisualizer-c3138a03c9e2.json', scope)
-client = gspread.authorize(creds)
+#colors = []
+#colors.append(respdata["colors"])
+#res = [list for x in order for list in colors[0] if list[0] == x] 
 
-# Find a workbook by name and open the first sheet
-# Make sure you use the right name here.
-sheet = client.open("Data dump").sheet1
+#print(type(data.to_string(index= False)))
 
-# Extract and print all of the values
-list_of_hashes = sheet.get_all_records()
-print(list_of_hashes)
-'''
+#def GetColors():
+#    colors = []
+#    names = list(name)
+#    conn = http.HTTPSConnection("api.scryfall.com")
+
+#    for n in names:
+#        conn.request("GET", ("/cards/named?exact={}".format(n).replace(" ", "+")))
+#        resp = js.loads(conn.getresponse().read())
+        
+
+#    #print(colors)
+#    data.insert(2, "Colors", colors)
+#    print(data.to_string(index = False))
+
+#GetColors()
+
+def pullAPIData():
+    cmc = []
+    colors = []
+    names = list(name)
+    conn = http.HTTPSConnection("api.scryfall.com")
+
+    for n in names:
+        conn.request("GET", ("/cards/named?exact={}".format(n).replace(" ", "+")))
+        resp = js.loads(conn.getresponse().read())
+        
+        # Create CMC column
+        cmc.append(int(resp["cmc"]))
+
+        # Create Colors column
+        if len(resp["colors"]) > 0:
+            colors.append("".join([list for y in order for list in resp["colors"] if list[0] == y]))
+        else:
+            colors.append("C")
+
+    data.insert(2, "CMC", cmc)
+    data.insert(3, "Colors", colors)
+    print(data.to_string(index = False))
+
+pullAPIData()
+
+average = data["CMC"].mean()
+print(average)
