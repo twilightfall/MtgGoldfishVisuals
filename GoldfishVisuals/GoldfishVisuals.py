@@ -3,8 +3,9 @@ import pandas as pa
 import matplotlib.pyplot as mpl
 import http.client as http
 import json as js
+import collections
 
-col = {"White":"W", "Blue":"U", "Black":"B", "Red":"R", "Green":"G", "Colorless":"C"}
+col = {"W":"White", "U":"Blue", "B":"Black", "R":"Red", "G":"Green", "C":"Colorless"}
 order = ["W","U","B","R","G","C"]
 data = pa.DataFrame(pa.read_csv("https://docs.google.com/spreadsheets/d/1nqQ01wzCNwJJOpVjLtOpPuOhm34CMwrZ1pImoZNOMhA/export?format=csv&gid=1802173994"))
 
@@ -69,4 +70,8 @@ def pullAPIData():
 pullAPIData()
 
 average = data["CMC"].mean()
-print(average)
+count = collections.Counter(data["Colors"])
+
+
+
+print("Average converted mana cost of top cards: " + average)
