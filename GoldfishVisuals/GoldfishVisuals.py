@@ -1,5 +1,4 @@
-﻿import numpy as np
-import pandas as pa
+﻿import pandas as pa
 import matplotlib.pyplot as plt
 import http.client as http
 import json as js
@@ -56,6 +55,7 @@ def pullAPIData():
 
     data.insert(2, "CMC", cmc)
     data.insert(3, "Colors", colors)
+    data['Colors'] = pa.Categorical(data['Colors'], categories = order)
     print(data.to_string(index = False))
 
 pullAPIData()
